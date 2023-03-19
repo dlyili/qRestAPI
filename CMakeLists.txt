@@ -58,7 +58,6 @@ set(KIT_MOC_SRCS
   qMidasAPI.h
   qRestAPI.h
   qRestAPI_p.h
-  qMidasAPI_p.h
   qRestResult.h
   )
 

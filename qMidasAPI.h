@@ -25,7 +25,6 @@
 
 #include "qRestAPI_Export.h"
 
-class qMidasAPIPrivate;
 
 /// qMidasAPI is a simple interface class to communicate with a Midas3 public
 /// API.
@@ -43,10 +42,7 @@ class qMidasAPIPrivate;
 class qRestAPI_EXPORT qMidasAPI : public qRestAPI
 {
   Q_OBJECT
-  /// Url of the Midas server. e.g. "http://slicer.kitware.com/midas3"
-  /// @deprecated Use the serverUrl property
-  Q_PROPERTY(QString midasUrl READ midasUrl WRITE setMidasUrl)
-  
+
   typedef qRestAPI Superclass;
 
 public:
@@ -77,25 +73,6 @@ public:
   /// \sa qRestResult::setError(const QString& error, qRestAPI::ErrorType errorType)
   static bool parseMidasResponse(qRestResult* restResult, const QByteArray& response);
 
-  /// @deprecated Use qRestAPI::Parameters.
-  typedef Parameters ParametersType;
-
-  QString midasUrl()const;
-  void setMidasUrl(const QString& newMidasUrl);
-
-  /// Utility function that waits \a maxWaitingTimeInMSecs msecs for the result
-  /// of the query. Returns the answer of the server or an empty map if the
-  /// result failed.
-  /// If an error is emitted, "queryError" is added to the output.
-  /// Internally, a QEventLoop is used so it can have side effects on your
-  /// application.
-  /// @deprecated Use the non-static version from qRestAPI.
-  static QList<QVariantMap> synchronousQuery(bool& ok,
-	  const QString& midasUrl,
-	  const QString& method,
-	  const ParametersType& parameters = ParametersType(),
-	  int maxWaitingTimeInMSecs = 2500);
-
 signals:
   void errorReceived(QUuid queryId, QString error);
   void resultReceived(QUuid queryId, QList<QVariantMap> result);
@@ -105,9 +82,6 @@ protected:
   void parseResponse(qRestResult* restResult, const QByteArray& response);
 
 private:
-  QScopedPointer<qMidasAPIPrivate> d_ptr;
-
-  Q_DECLARE_PRIVATE(qMidasAPI);
   Q_DISABLE_COPY(qMidasAPI);
 };
 

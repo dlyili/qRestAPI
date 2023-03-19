@@ -30,32 +30,7 @@
 
 // qMidasAPI includes
 #include "qMidasAPI.h"
-#include "qMidasAPI_p.h"
 #include "qRestResult.h"
-
-// --------------------------------------------------------------------------
-void qMidasAPIResult::setResult(const QUuid& queryUuid, const QList<QVariantMap>& result)
-{
-	this->QueryUuid = queryUuid;
-	this->Result = result;
-}
-
-// --------------------------------------------------------------------------
-void qMidasAPIResult::setError(const QUuid& queryUuid, const QString& error)
-{
-	this->Error += error;
-}
-
-// --------------------------------------------------------------------------
-// qMidasAPIPrivate methods
-
-// --------------------------------------------------------------------------
-qMidasAPIPrivate::qMidasAPIPrivate(qMidasAPI* object)
-	: Superclass(object)
-	, q_ptr(object)
-{
-	this->ResponseType = "json";
-}
 
 // --------------------------------------------------------------------------
 // qMidasAPI methods
@@ -63,67 +38,12 @@ qMidasAPIPrivate::qMidasAPIPrivate(qMidasAPI* object)
 // --------------------------------------------------------------------------
 qMidasAPI::qMidasAPI(QObject* _parent)
   : Superclass(_parent)
-  , d_ptr(new qMidasAPIPrivate(this))
 {
 }
 
 // --------------------------------------------------------------------------
 qMidasAPI::~qMidasAPI()
 {
-}
-
-// --------------------------------------------------------------------------
-QString qMidasAPI::midasUrl()const
-{
-	return Superclass::serverUrl();
-}
-
-// --------------------------------------------------------------------------
-void qMidasAPI::setMidasUrl(const QString& newMidasUrl)
-{
-	Superclass::setServerUrl(newMidasUrl);
-}
-
-// --------------------------------------------------------------------------
-QList<QVariantMap> qMidasAPI::synchronousQuery(
-	bool& ok,
-	const QString& serverUrl,
-	const QString& method,
-	const ParametersType& parameters,
-	int maxWaitingTimeInMSecs)
-{
-	qMidasAPI restAPI;
-	restAPI.setServerUrl(serverUrl);
-	restAPI.setTimeOut(maxWaitingTimeInMSecs);
-	QUuid queryUuid = restAPI.get(method, parameters);
-	qMidasAPIResult queryResult;
-	QObject::connect(&restAPI, SIGNAL(resultReceived(QUuid, QList<QVariantMap>)),
-		&queryResult, SLOT(setResult(QUuid, QList<QVariantMap>)));
-	QObject::connect(&restAPI, SIGNAL(errorReceived(QUuid, QString)),
-		&queryResult, SLOT(setError(QUuid, QString)));
-	QEventLoop eventLoop;
-	QObject::connect(&restAPI, SIGNAL(resultReceived(QUuid, QList<QVariantMap>)),
-		&eventLoop, SLOT(quit()));
-	// Time out will fire an error which will quit the event loop.
-	QObject::connect(&restAPI, SIGNAL(errorReceived(QUuid, QString)),
-		&eventLoop, SLOT(quit()));
-	eventLoop.exec();
-	ok = queryResult.Error.isNull();
-	if (!ok)
-	{
-		QVariantMap map;
-		map["queryError"] = queryResult.Error;
-		queryResult.Result.push_front(map);
-	}
-	if (queryResult.Result.count() == 0)
-	{
-		// \tbd
-		Q_ASSERT(queryResult.Result.count());
-		QVariantMap map;
-		map["queryError"] = tr("Unknown error");
-		queryResult.Result.push_front(map);
-	}
-	return queryResult.Result;
 }
 
 // --------------------------------------------------------------------------
