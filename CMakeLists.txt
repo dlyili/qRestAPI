@@ -9,7 +9,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE 1)
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_TESTING "Test the project" ON)
 
-set(qRestAPI_QT_VERSION "4" CACHE STRING "Expected Qt version")
+set(qRestAPI_QT_VERSION "5" CACHE STRING "Expected Qt version")
 mark_as_advanced(qRestAPI_QT_VERSION)
 set_property(CACHE qRestAPI_QT_VERSION PROPERTY STRINGS 4 5)
 if(NOT (qRestAPI_QT_VERSION VERSION_EQUAL "4" OR qRestAPI_QT_VERSION VERSION_EQUAL "5"))
@@ -58,6 +58,7 @@ set(KIT_MOC_SRCS
   qMidasAPI.h
   qRestAPI.h
   qRestAPI_p.h
+  qMidasAPI_p.h
   qRestResult.h
   )
 
