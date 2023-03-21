@@ -513,12 +513,11 @@ QUuid qRestAPI::head(const QString  resource, const Parameters& parameters, cons
 // --------------------------------------------------------------------------
 QUuid qRestAPI::download(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
-  Q_UNUSED(rawHeaders);
   Q_D(qRestAPI);
 
   QIODevice* output = new QFile(fileName);
 
-  QUuid queryId = get(output, resource, parameters);
+  QUuid queryId = get(output, resource, parameters, rawHeaders);
 
   output->setParent(d->results[queryId]);
 
@@ -535,19 +534,19 @@ QUuid qRestAPI::del(const QString& resource, const Parameters& parameters, const
 }
 
 // --------------------------------------------------------------------------
-QUuid qRestAPI::post(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+QUuid qRestAPI::post(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders, const QByteArray& data)
 {
   QUrl url = createUrl(resource, parameters);
-  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PostOperation, url, rawHeaders);
+  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PostOperation, url, rawHeaders, data);
   QUuid queryId = queryReply->property("uuid").toString();
   return queryId;
 }
 
 // --------------------------------------------------------------------------
-QUuid qRestAPI::put(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+QUuid qRestAPI::put(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders, const QByteArray& data)
 {
   QUrl url = createUrl(resource, parameters);
-  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders);
+  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders, data);
   QUuid queryId = queryReply->property("uuid").toString();
   return queryId;
 }

@@ -204,7 +204,8 @@ public:
   /// Returns a unique identifier of the posted query.
   QUuid post(const QString& resource,
     const Parameters& parameters = Parameters(),
-    const RawHeaders& rawHeaders = RawHeaders());
+    const RawHeaders& rawHeaders = RawHeaders(),
+    const QByteArray& data = QByteArray());
 
   /// Sends a PUT request to the web service.
   /// The \a resource and \parameters are used to compose the URL.
@@ -219,7 +220,8 @@ public:
   /// Returns a unique identifier of the posted query.
   QUuid put(const QString& resource,
     const Parameters& parameters = Parameters(),
-    const RawHeaders& rawHeaders = RawHeaders());
+    const RawHeaders& rawHeaders = RawHeaders(),
+    const QByteArray& data = QByteArray());
 
   virtual QUuid put(QIODevice* input,
     const QString& resource,
