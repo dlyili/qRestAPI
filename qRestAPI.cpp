@@ -30,6 +30,7 @@
 #if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
 #include <QUrlQuery>
 #endif
+#include <QHttpMultiPart>
 
 // qRestAPI includes
 #include "qRestAPI.h"
@@ -53,6 +54,7 @@ qRestAPIPrivate::qRestAPIPrivate(qRestAPI* object)
   : q_ptr(object)
   , NetworkManager(NULL)
   , TimeOut(0)
+  , bSynchronous(false)
   , SuppressSslErrors(true)
   , ErrorCode(qRestAPI::UnknownError)
   , ErrorString(unknownErrorStr)
@@ -102,10 +104,15 @@ void qRestAPI::setHttpNetworkProxy(const QNetworkProxy &proxy)
 QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
     const QUrl& url,
     const qRestAPI::RawHeaders& rawHeaders,
-    const QByteArray &data)
+    const QByteArray &data,
+    QHttpMultiPart* multiPart)
 {
   Q_D(qRestAPI);
   QNetworkRequest queryRequest;
+  if (d->bSynchronous)
+  {
+	  queryRequest.setAttribute(QNetworkRequest::SynchronousRequestAttribute, d->bSynchronous);
+  }
   queryRequest.setUrl(url);
 
   for (QMapIterator<QByteArray, QByteArray> it(d->DefaultRawHeaders); it.hasNext();)
@@ -130,10 +137,30 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
       queryReply = d->NetworkManager->deleteResource(queryRequest);
       break;
     case QNetworkAccessManager::PutOperation:
-      queryReply = d->NetworkManager->put(queryRequest, data);
+    {
+        if (multiPart == NULL)
+        {
+            queryReply = d->NetworkManager->put(queryRequest, data);
+        }
+        else
+        {
+            queryReply = d->NetworkManager->put(queryRequest, multiPart);
+            multiPart->setParent(queryReply);
+        }
+    }
       break;
     case QNetworkAccessManager::PostOperation:
-      queryReply = d->NetworkManager->post(queryRequest, data);
+	{
+		if (multiPart == NULL)
+		{
+			queryReply = d->NetworkManager->post(queryRequest, data);   
+		}
+		else
+		{
+			queryReply = d->NetworkManager->post(queryRequest, multiPart);
+            multiPart->setParent(queryReply);
+		}
+	}
       break;
     case QNetworkAccessManager::HeadOperation:
       queryReply = d->NetworkManager->head(queryRequest);
@@ -157,10 +184,11 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
 
   qRestResult* result = new qRestResult(queryId);
   d->results[queryId] = result;
-//  QObject::connect(this, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)),
-//                   result, SLOT(setResult(QList<QVariantMap>)));
-//  QObject::connect(this, SIGNAL(errorReceived(QUuid,QString)),
-//                   result, SLOT(setError(QString)));
+
+  if (d->bSynchronous)
+  {
+      d->processReply(queryReply);
+  }
 
   return queryReply;
 }
@@ -398,6 +426,20 @@ int qRestAPI::timeOut()const
   return d->TimeOut;
 }
 
+
+bool qRestAPI::synchronous() const
+{
+	Q_D(const qRestAPI);
+	return d->bSynchronous;
+}
+
+
+void qRestAPI::setSynchronous(bool synchronous)
+{
+	Q_D(qRestAPI);
+	d->bSynchronous = synchronous;
+}
+
 // --------------------------------------------------------------------------
 void qRestAPI::setTimeOut(int msecs)
 {
@@ -534,19 +576,19 @@ QUuid qRestAPI::del(const QString& resource, const Parameters& parameters, const
 }
 
 // --------------------------------------------------------------------------
-QUuid qRestAPI::post(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders, const QByteArray& data)
+QUuid qRestAPI::post(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders, const QByteArray& data, QHttpMultiPart* multiPart)
 {
   QUrl url = createUrl(resource, parameters);
-  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PostOperation, url, rawHeaders, data);
+  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PostOperation, url, rawHeaders, data, multiPart);
   QUuid queryId = queryReply->property("uuid").toString();
   return queryId;
 }
 
 // --------------------------------------------------------------------------
-QUuid qRestAPI::put(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders, const QByteArray& data)
+QUuid qRestAPI::put(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders, const QByteArray& data, QHttpMultiPart* multiPart)
 {
   QUrl url = createUrl(resource, parameters);
-  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders, data);
+  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders, data, multiPart);
   QUuid queryId = queryReply->property("uuid").toString();
   return queryId;
 }

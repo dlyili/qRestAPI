@@ -93,6 +93,7 @@ public:
 
   QNetworkAccessManager* NetworkManager;
   int TimeOut;
+  bool bSynchronous;
   qRestAPI::RawHeaders DefaultRawHeaders;
   bool SuppressSslErrors;
 

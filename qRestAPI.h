@@ -35,6 +35,7 @@ template <class Key, class T> class QMap;
 typedef QMap<QString, QVariant> QVariantMap;
 
 class QNetworkReply;
+class QHttpMultiPart;
 class qRestAPIPrivate;
 
 class qRestResult;
@@ -129,6 +130,11 @@ public:
   void setTimeOut(int msecs);
   int timeOut()const;
 
+  /// Tells if synchronous reply.
+  bool synchronous()const;
+  /// Sets if synchronous or not reply.
+  void setSynchronous(bool synchronous);
+
   /// Sends a GET request to the web service.
   /// The \a resource and \parameters are used to compose the URL.
   /// \a rawHeaders can be used to set the raw headers of the request to send.
@@ -205,7 +211,8 @@ public:
   QUuid post(const QString& resource,
     const Parameters& parameters = Parameters(),
     const RawHeaders& rawHeaders = RawHeaders(),
-    const QByteArray& data = QByteArray());
+    const QByteArray& data = QByteArray(),
+    QHttpMultiPart* multiPart = 0);
 
   /// Sends a PUT request to the web service.
   /// The \a resource and \parameters are used to compose the URL.
@@ -221,7 +228,8 @@ public:
   QUuid put(const QString& resource,
     const Parameters& parameters = Parameters(),
     const RawHeaders& rawHeaders = RawHeaders(),
-    const QByteArray& data = QByteArray());
+    const QByteArray& data = QByteArray(),
+    QHttpMultiPart* multiPart = 0);
 
   virtual QUuid put(QIODevice* input,
     const QString& resource,
@@ -344,7 +352,8 @@ protected:
   QNetworkReply* sendRequest(QNetworkAccessManager::Operation operation,
       const QUrl& url,
       const RawHeaders& rawHeaders = RawHeaders(),
-      const QByteArray& data = QByteArray());
+      const QByteArray& data = QByteArray(),
+      QHttpMultiPart* multiPart = 0);
 
   virtual QUrl createUrl(const QString& method, const qRestAPI::Parameters& parameters);
   virtual void parseResponse(qRestResult* restResult, const QByteArray& response);
