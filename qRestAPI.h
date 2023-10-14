@@ -25,7 +25,11 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QJSValue>
+#else
 #include <QScriptValue>
+#endif
 #include <QUuid>
 #include <QVariant>
 
@@ -211,8 +215,8 @@ public:
   QUuid post(const QString& resource,
     const Parameters& parameters = Parameters(),
     const RawHeaders& rawHeaders = RawHeaders(),
-    const QByteArray& data = QByteArray(),
-    QHttpMultiPart* multiPart = 0);
+	const QByteArray& data = QByteArray(),
+	QHttpMultiPart* multiPart = 0);
 
   /// Sends a PUT request to the web service.
   /// The \a resource and \parameters are used to compose the URL.
@@ -228,8 +232,8 @@ public:
   QUuid put(const QString& resource,
     const Parameters& parameters = Parameters(),
     const RawHeaders& rawHeaders = RawHeaders(),
-    const QByteArray& data = QByteArray(),
-    QHttpMultiPart* multiPart = 0);
+	const QByteArray& data = QByteArray(),
+	QHttpMultiPart* multiPart = 0);
 
   virtual QUuid put(QIODevice* input,
     const QString& resource,
@@ -260,6 +264,7 @@ public:
   /// If the \a queryId parameter is unknown, this function
   /// returns NULL and sets the error state to ErrorType::UnknownUuid.
   qRestResult* takeResult(const QUuid& queryId);
+  qRestResult* getResult(const QUuid& queryId);
 
   /// Get the error code for the last error which occured.
   ErrorType error() const;
@@ -293,8 +298,13 @@ public:
   /// ```
   static QString qVariantToString(const QVariant &value, int indent=0);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+  static QVariantMap scriptValueToMap(const QJSValue& value);
+  static void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QJSValue& value);
+#else
   static QVariantMap scriptValueToMap(const QScriptValue& value);
   static void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QScriptValue& value);
+#endif
 
   /// \brief Flatten a QVariantMap of nested QVariantList, QVariantMap and QVariant.
   ///
