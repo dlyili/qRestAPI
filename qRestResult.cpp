@@ -51,13 +51,13 @@ const QUuid& qRestResult::queryId() const
 // --------------------------------------------------------------------------
 const QList<QVariantMap>& qRestResult::results() const
 {
-  return this->Result;
+  return this->Results;
 }
 
 // --------------------------------------------------------------------------
-const QVariantMap qRestResult::result() const
+const QVariantMap& qRestResult::result() const
 {
-  return this->Result.isEmpty() ? QVariantMap() : this->Result[0];
+  return this->Results.isEmpty() ? this->Result : this->Results[0];
 }
 
 // --------------------------------------------------------------------------
@@ -89,7 +89,7 @@ QMap<QByteArray, QByteArray> qRestResult::rawHeaders() const
 }
 
 // --------------------------------------------------------------------------
-QByteArray qRestResult::response()const
+const QByteArray& qRestResult::response()const
 {
   return this->Reponse;
 }
@@ -104,9 +104,9 @@ void qRestResult::setResult()
 // --------------------------------------------------------------------------
 void qRestResult::setResult(const QList<QVariantMap>& result)
 {
-  this->Result.clear();
+  this->Results.clear();
   for (int i = 0; i < result.size(); ++i)
-    this->Result.push_back(result[i]);
+    this->Results.push_back(result[i]);
 //  this->Result = result;
   this->done = true;
   emit ready();

@@ -90,8 +90,9 @@ bool qGirderAPI::parseGirderAPIv1Response(qRestResult* restResult, const QByteAr
 }
 
 // --------------------------------------------------------------------------
-void qGirderAPI::parseResponse(qRestResult* restResult, const QByteArray& response)
+void qGirderAPI::parseResponse(qRestResult* restResult, QNetworkReply* reply, const QByteArray& response)
 {
+  Q_UNUSED(reply);
   Q_UNUSED(response);
   qGirderAPI::parseGirderAPIv1Response(restResult, response);
 }

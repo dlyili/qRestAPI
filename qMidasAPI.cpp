@@ -161,15 +161,16 @@ bool qMidasAPI::parseMidasResponse(qRestResult* restResult, const QByteArray& re
 }
 
 // --------------------------------------------------------------------------
-void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& response)
+void qMidasAPI::parseResponse(qRestResult* restResult, QNetworkReply* reply, const QByteArray& response)
 {
-  bool success = qMidasAPI::parseMidasResponse(restResult, response);
-  if (success)
+    Q_UNUSED(reply);
+    bool success = qMidasAPI::parseMidasResponse(restResult, response);
+    if (success)
     {
-    emit resultReceived(restResult->queryId(), restResult->results());
+      emit resultReceived(restResult->queryId(), restResult->results());
     }
-  else
+    else
     {
-    emit errorReceived(restResult->queryId(), restResult->error());
+      emit errorReceived(restResult->queryId(), restResult->error());
     }
 }

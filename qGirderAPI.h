@@ -39,7 +39,7 @@ public:
   static bool parseGirderAPIv1Response(qRestResult* restResult, const QByteArray& response);
 
 protected:
-  void parseResponse(qRestResult* restResult, const QByteArray& response);
+  void parseResponse(qRestResult* restResult, QNetworkReply* reply, const QByteArray& response);
 
 private:
   Q_DISABLE_COPY(qGirderAPI);

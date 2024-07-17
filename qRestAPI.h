@@ -32,11 +32,12 @@
 #endif
 #include <QUuid>
 #include <QVariant>
+#include <QVariantMap>
 
 #include "qRestAPI_Export.h"
 
-template <class Key, class T> class QMap;
-typedef QMap<QString, QVariant> QVariantMap;
+//template <class Key, class T> class QMap;
+//typedef QMap<QString, QVariant> QVariantMap;
 
 class QNetworkReply;
 class QHttpMultiPart;
@@ -354,6 +355,9 @@ public:
   ///
   static QVariantMap qVariantMapFlattened(const QVariantMap& value);
 
+  static Parameters toParameters(const QVariantMap& parameters);
+  static RawHeaders toRawHeaders(const QVariantMap& headers);
+  
 signals:
   void finished(const QUuid& queryId);
   void progress(const QUuid& queryId, double progress);
@@ -366,7 +370,7 @@ protected:
       QHttpMultiPart* multiPart = 0);
 
   virtual QUrl createUrl(const QString& method, const qRestAPI::Parameters& parameters);
-  virtual void parseResponse(qRestResult* restResult, const QByteArray& response);
+  virtual void parseResponse(qRestResult* restResult, QNetworkReply* reply, const QByteArray& response);
 
 private:
   QScopedPointer<qRestAPIPrivate> d_ptr;

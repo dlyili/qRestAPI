@@ -38,7 +38,8 @@ class qRestAPI_EXPORT qRestResult : public QObject
 
   QUuid QueryId;
   QByteArray Reponse;
-  QList<QVariantMap> Result;
+  QList<QVariantMap> Results;
+  QVariantMap Result;
   QString Error;
   qRestAPI::ErrorType ErrorCode;
 
@@ -56,7 +57,7 @@ public:
   bool waitForDone();
 
   const QList<QVariantMap>& results() const;
-  const QVariantMap result() const;
+  const QVariantMap& result() const;
   // FIXME: for consistency with the qRestAPI class, this method should be called errorString()
   const QString& error() const;
   // FIXME: for consistency with the qRestAPI class, this method should be called error()
@@ -65,7 +66,7 @@ public:
   QByteArray rawHeader(const QByteArray& name) const;
   QMap<QByteArray, QByteArray> rawHeaders() const;
 
-  QByteArray response()const;
+  const QByteArray& response()const;
 
 public slots:
   void setResult();

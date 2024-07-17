@@ -79,7 +79,7 @@ signals:
 
 protected:
   QUrl createUrl(const QString& method, const qRestAPI::Parameters& parameters);
-  void parseResponse(qRestResult* restResult, const QByteArray& response);
+  void parseResponse(qRestResult* restResult, QNetworkReply* reply, const QByteArray& response);
 
 private:
   Q_DISABLE_COPY(qMidasAPI);

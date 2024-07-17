@@ -33,6 +33,7 @@
 #include <QScriptValueIterator>
 #endif
 #include <QHttpMultiPart>
+#include <QJsonDocument>
 
 // qRestAPI includes
 #include "qRestAPI.h"
@@ -293,11 +294,14 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
                          QString::number(static_cast<int>(reply->error())) + ": " +
                          reply->errorString(),
                          errorCode);
+
+    restResult->Result["code"] = (int)restResult->errorType();
+    restResult->Result["message"] = restResult->error();
     }
   else
     {
-    restResult->Reponse = reply->readAll();
-    q->parseResponse(restResult, restResult->response());
+      restResult->Reponse = reply->readAll();
+      q->parseResponse(restResult, reply, restResult->Reponse);
     }
 
   #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
@@ -509,11 +513,18 @@ QUrl qRestAPI::createUrl(const QString& resource, const qRestAPI::Parameters& pa
 }
 
 // --------------------------------------------------------------------------
-void qRestAPI::parseResponse(qRestResult* restResult, const QByteArray& response)
+void qRestAPI::parseResponse(qRestResult* restResult, QNetworkReply* reply, const QByteArray& response)
 {
-  Q_UNUSED(response);
-  QList<QVariantMap> result;
-  restResult->setResult(result);
+	if (reply->header(QNetworkRequest::ContentTypeHeader).toString().contains(QString("application/json"), Qt::CaseInsensitive))
+	{
+		restResult->Result = QJsonDocument::fromJson(response).toVariant().toMap();
+	}
+    if (restResult->Result.isEmpty())
+	{
+		restResult->Result["code"] = 200;
+		restResult->Result["message"] = QString::fromUtf8(response);
+	}
+    restResult->setResult();
 }
 
 // --------------------------------------------------------------------------
@@ -667,13 +678,12 @@ bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
     qRestResult* queryResult = d->results.take(queryId);
     if (!ok)
       {
-      QVariantMap map;
-      map["queryError"] = queryResult->Error;
-      queryResult->Result.push_front(map);
+      queryResult->Result["code"] = (int)queryResult->errorType();
+      queryResult->Result["message"] = queryResult->error();
       d->ErrorCode = queryResult->errorType();
       d->ErrorString = queryResult->error();
       }
-    result = queryResult->Result;
+    result = queryResult->Results;
     delete queryResult;
     return ok;
     }
@@ -790,3 +800,23 @@ QString qRestAPI::errorString() const
 //  authenticator->setUser(d->userName);
 //  authenticator->setPassword(d->password);
 //}
+
+qRestAPI::Parameters qRestAPI::toParameters(const QVariantMap& parameters)
+{
+	Parameters map_result;
+	for (const QString& key : parameters.keys())
+	{
+		map_result[key] = parameters[key].toString();
+	}
+	return map_result;
+}
+
+qRestAPI::RawHeaders qRestAPI::toRawHeaders(const QVariantMap& headers)
+{
+	RawHeaders map_result;
+	for (const QString& key : headers.keys())
+	{
+		map_result[key.toUtf8()] = headers[key].toString().toUtf8();
+	}
+	return map_result;
+}
